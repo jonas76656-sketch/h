@@ -16,7 +16,6 @@ def download():
     data = request.json
     video_url = data.get('url')
     
-    # TikTok ရော YouTube ရော အကုန်ရအောင် options ပြင်ထားပါတယ်
     ydl_opts = {
         'format': 'best',
         'quiet': True,
@@ -26,6 +25,7 @@ def download():
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
+            # ဒေါင်းလုဒ်ဆွဲရန် တိုက်ရိုက် Link ကို ရှာဖွေခြင်း
             video_link = info.get('url') or info.get('formats')[0].get('url')
             return jsonify({
                 'success': True,
@@ -36,14 +36,14 @@ def download():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-# ဤအပိုင်းက 425 bytes ဖြစ်တဲ့ပြဿနာကို ဖြေရှင်းပေးမှာပါ
+# ဤ Route က 425 bytes ပြဿနာကို ဖြေရှင်းပေးမည်ဖြစ်သည်
 @app.route('/proxy-download')
 def proxy_download():
     target_url = request.args.get('url')
     if not target_url:
         return "URL missing", 400
         
-    # ဖိုင်ကို backend ကနေ လှမ်းဆွဲပြီး client ဆီ stream ပို့ပေးခြင်း
+    # Backend ကနေ ဗီဒီယိုကို Stream လုပ်ပြီး Client ထံသို့ တိုက်ရိုက်ပို့ပေးခြင်း
     r = requests.get(target_url, stream=True, headers={'User-Agent': 'Mozilla/5.0'})
     
     def generate():
@@ -55,5 +55,6 @@ def proxy_download():
                     headers={"Content-Disposition": "attachment; filename=video.mp4"})
 
 if __name__ == '__main__':
+    # Railway ၏ Port သတ်မှတ်ချက်အတိုင်း Run ခြင်း
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
