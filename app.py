@@ -16,7 +16,12 @@ def download():
     data = request.json
     video_url = data.get('url')
     
-    ydl_opts = {'format': 'best', 'quiet': True}
+    # TikTok ရော YouTube ရော အကုန်ရအောင် options ပြင်ထားပါတယ်
+    ydl_opts = {
+        'format': 'best',
+        'quiet': True,
+        'no_warnings': True,
+    }
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -31,15 +36,24 @@ def download():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)})
 
-# ဖိုင်ကို တိုက်ရိုက်ဒေါင်းလုဒ်ဆွဲပေးမည့် Proxy Route
+# ဤအပိုင်းက 425 bytes ဖြစ်တဲ့ပြဿနာကို ဖြေရှင်းပေးမှာပါ
 @app.route('/proxy-download')
 def proxy_download():
-    url = request.args.get('url')
-    r = requests.get(url, stream=True)
-    return Response(r.iter_content(chunk_size=1024*1024), 
-                    content_type=r.headers['Content-Type'],
+    target_url = request.args.get('url')
+    if not target_url:
+        return "URL missing", 400
+        
+    # ဖိုင်ကို backend ကနေ လှမ်းဆွဲပြီး client ဆီ stream ပို့ပေးခြင်း
+    r = requests.get(target_url, stream=True, headers={'User-Agent': 'Mozilla/5.0'})
+    
+    def generate():
+        for chunk in r.iter_content(chunk_size=1024*1024):
+            yield chunk
+            
+    return Response(generate(), 
+                    content_type=r.headers.get('Content-Type', 'video/mp4'),
                     headers={"Content-Disposition": "attachment; filename=video.mp4"})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
