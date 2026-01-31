@@ -5,185 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Video Downloader Pro</title>
     <style>
-        :root {
-            --primary: #fe2c55;
-            --secondary: #25f4ee;
-            --dark-bg: #0f0f0f;
-            --card-bg: #1e1e1e;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            background-color: var(--dark-bg);
-            color: white;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .container {
-            background: var(--card-bg);
-            width: 90%;
-            max-width: 420px;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            text-align: center;
-            border: 1px solid #333;
-        }
-
-        h1 {
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 30px;
-            margin-bottom: 10px;
-        }
-
-        p { color: #888; font-size: 14px; margin-bottom: 25px; }
-
-        input {
-            width: 100%;
-            padding: 16px;
-            border-radius: 30px;
-            border: 2px solid #333;
-            background: #2a2a2a;
-            color: white;
-            box-sizing: border-box;
-            outline: none;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        input:focus { border-color: var(--primary); }
-
-        .btn-get {
-            width: 100%;
-            padding: 16px;
-            margin-top: 15px;
-            border-radius: 30px;
-            border: none;
-            background: var(--primary);
-            color: white;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(254, 44, 85, 0.3);
-        }
-
-        #result {
-            margin-top: 30px;
-            display: none;
-            padding: 15px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 20px;
-            border: 1px solid #444;
-        }
-
-        #thumb {
-            width: 100%;
-            border-radius: 12px;
-            margin-bottom: 15px;
-        }
-
-        .btn-download {
-            display: block;
-            width: 100%;
-            padding: 15px;
-            background: var(--secondary);
-            color: black;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-        }
-
-        .loader {
-            display: none;
-            border: 4px solid #333;
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        :root { --primary: #fe2c55; --secondary: #25f4ee; --dark: #0f0f0f; }
+        body { font-family: sans-serif; background: var(--dark); color: white; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .container { background: #1e1e1e; padding: 30px; border-radius: 25px; width: 90%; max-width: 400px; text-align: center; border: 1px solid #333; }
+        h1 { background: linear-gradient(45deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        input { width: 100%; padding: 15px; border-radius: 30px; border: 2px solid #333; background: #2a2a2a; color: white; box-sizing: border-box; outline: none; margin-bottom: 15px; }
+        .btn-get { width: 100%; padding: 15px; border-radius: 30px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; }
+        #result { margin-top: 25px; display: none; }
+        .btn-dl { display: block; width: 100%; padding: 15px; background: var(--secondary); color: black; text-decoration: none; border-radius: 12px; font-weight: bold; border: none; margin-top: 15px; cursor: pointer; }
+        .loader { display: none; border: 4px solid #333; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
     <div class="container">
         <h1>Downloader</h1>
-        <p>TikTok, YouTube, FB Video Downloader</p>
-
         <input type="text" id="urlInput" placeholder="Paste link here...">
         <button class="btn-get" onclick="fetchVideo()">Get Video</button>
-
         <div id="loader" class="loader"></div>
-
         <div id="result">
-            <img id="thumb" src="">
-            <p id="videoTitle" style="color: white; margin-bottom: 15px; font-weight: bold;"></p>
-            <button id="dlBtn" class="btn-download">Download MP4 Now</button>
+            <img id="thumb" src="" style="width: 100%; border-radius: 10px;">
+            <p id="videoTitle" style="font-weight: bold; margin: 15px 0;"></p>
+            <button id="dlBtn" class="btn-dl">Download MP4 Now</button>
         </div>
     </div>
 
     <script>
-        // သင့်၏ Railway Domain URL
+        // သင်၏ Railway URL အတိအကျဖြစ်သည်
         const BASE_URL = "https://h-production-8be0.up.railway.app";
 
         async function fetchVideo() {
-            const urlInput = document.getElementById('urlInput').value;
+            const url = document.getElementById('urlInput').value;
             const loader = document.getElementById('loader');
-            const resultDiv = document.getElementById('result');
-            const dlBtn = document.getElementById('dlBtn');
+            const result = document.getElementById('result');
 
-            if (!urlInput) return alert("Link ထည့်ပေးပါ");
-
+            if (!url) return alert("Link ထည့်ပါ");
             loader.style.display = 'block';
-            resultDiv.style.display = 'none';
+            result.style.display = 'none';
 
             try {
                 const response = await fetch(`${BASE_URL}/download`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url: urlInput })
+                    body: JSON.stringify({ url: url })
                 });
-
                 const data = await response.json();
 
                 if (data.success) {
                     document.getElementById('thumb').src = data.thumbnail;
                     document.getElementById('videoTitle').innerText = data.title;
                     
-                    // Proxy Route ကို သုံးပြီး တန်းဒေါင်းခိုင်းခြင်း
-                    dlBtn.onclick = function() {
-                        dlBtn.innerText = "Downloading...";
-                        dlBtn.style.opacity = "0.5";
-                        
-                        // Force download via backend proxy
+                    // ဒေါင်းလုဒ်ခလုတ် နှိပ်ပါက Proxy Route သို့ လွှတ်ပေးခြင်း
+                    document.getElementById('dlBtn').onclick = function() {
+                        this.innerText = "Downloading...";
                         window.location.href = `${BASE_URL}/proxy-download?url=${encodeURIComponent(data.download_url)}`;
-                        
-                        setTimeout(() => {
-                            dlBtn.innerText = "Download MP4 Now";
-                            dlBtn.style.opacity = "1";
-                        }, 5000);
+                        setTimeout(() => this.innerText = "Download MP4 Now", 5000);
                     };
 
                     loader.style.display = 'none';
-                    resultDiv.style.display = 'block';
+                    result.style.display = 'block';
                 } else {
                     alert("Error: " + data.error);
                     loader.style.display = 'none';
                 }
-            } catch (error) {
-                alert("Server Error! Connection မရပါ။");
+            } catch (e) {
+                alert("Server Error!");
                 loader.style.display = 'none';
             }
         }
